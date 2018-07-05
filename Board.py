@@ -113,6 +113,7 @@ class Board(object):
         # I'm sorry for this line, but I love Python!
         pos_string = ''.join(['/' * (n % 5 == 0 and n != 0) + p.get_state().name for n, p in enumerate(self.points)])
 
+        # replacement dict: {'EEEEE: 5, 'EEEE': 4, 'EEE: 3, 'EE': 2, 'E': 1}
         for i in reversed(range(1, 6)):
             pos_string = pos_string.replace(''.join('E' * i), str(i))
 
