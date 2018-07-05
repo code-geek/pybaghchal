@@ -110,6 +110,10 @@ class Board(object):
 
     @property
     def position(self):
+        """
+        Returns the board's shortened position string
+        """
+
         # I'm sorry for this line, but I love Python!
         pos_string = ''.join(['/' * (n % 5 == 0 and n != 0) + p.get_state().name for n, p in enumerate(self.points)])
 
