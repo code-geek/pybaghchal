@@ -40,6 +40,10 @@ class Point(object):
     def coord(self):
         return "%s%s" % (str(self.file), str(self.rank))
 
+    @property
+    def index(self):
+        return (self.file.value - 1) + (int(self.rank) - 1) * 5
+
     def __str__(self):
         return self.coord
 
