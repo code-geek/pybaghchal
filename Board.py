@@ -9,6 +9,9 @@ class Board(object):
         T = 1
         G = 2
 
+    # horizontal (1, -1) # vertical (5, -5) # diagonal (4, -4, 6, -6)
+    directions = [1, -1, 5, -5, 4, -4, 6, -6]
+
     def __init__(self, position=None):
         super(Board, self).__init__()
         # initialize the board to the starting position
@@ -24,6 +27,10 @@ class Board(object):
                 self.points[i].set_state("T")
 
     def point_index(self, coord):
+        # if an integer is passed, check if it's valid and return it
+        if type(coord) == int:
+            return coord
+
         file, rank = coord
 
         # check if the coordinates are valid
@@ -57,8 +64,7 @@ class Board(object):
 5 %s   %s   %s   %s   %s\n""" % tuple(i.print_state() for i in self.points))
         print("Turn: %s" % ("Goat" if self.turn == self.Player.G else "Tiger"))
         print("Remaining Goats: %d" % self.goatsToBePlaced)
-        print("Dead Goats: %d" % self.deadGoats)
-        print("Tiger Pos: %s" % str(self.tigerPos))
+        print("Dead Goats: %d\n" % self.deadGoats)
 
     def _get_full_position(self, pos_string):
         """
@@ -137,9 +143,13 @@ class Board(object):
         eg. 'A1' to 'B2'
         """
 
-        # point_index checks if the points are valid
+        # point_index checks if the points are valid points on the board
         from_point = self.point_index(from_point)
         to_point = self.point_index(to_point)
+
+        # check if both points are on the board
+        if from_point not in range(25) or to_point not in range(25):
+            return False
 
         return (
             # to_point must be empty
@@ -152,3 +162,78 @@ class Board(object):
                 ((from_point % 2 == 0) and abs(from_point - to_point) in [4, 6])
             )
         )
+
+    def can_capture(self, from_point, to_point):
+        """
+        Can a tiger capture from one particular point to another?
+        eg. 'C1' to 'E1'
+        """
+
+        # point_index checks if the points are valid points on the board
+        from_point = self.point_index(from_point)
+        to_point = self.point_index(to_point)
+
+        # check if both points are on the board
+        if from_point not in range(25) or to_point not in range(25):
+            return False
+
+        # check for a valid midpoint
+        if (from_point + to_point) % 2 != 0:
+            return False
+
+        mid_point = int((from_point + to_point) / 2)
+
+        return (
+            # from_point must be a tiger
+            self.points[from_point].get_state() == Point.State.T and
+            # mid_point must be a goat
+            self.points[mid_point].get_state() == Point.State.G and
+            # to_point must be empty
+            self.points[to_point].get_state() == Point.State.E and
+            # the points must be one point apart
+            (
+                # horizontal and vertical
+                abs(from_point - to_point) in [2, 10] or\
+                # diagonal (allowed only from even points)
+                ((from_point % 2 == 0) and abs(from_point - to_point) in [8, 12])
+            )
+        )
+
+    def _tiger_moves(self):
+        """
+        Returns a generator that loops through the possible moves for each tiger
+        """
+
+        return (
+            self.is_movable(f, f + d) or self.can_capture(f, f + 2 * d)
+            for f in self.tigerPos
+            for d in Board.directions
+        )
+
+    def movable_tigers(self):
+        """
+        Returns the number of movable tigers
+        """
+
+        return sum(self._tiger_moves())
+
+    def all_tigers_trapped(self):
+        """
+        Are all tigers trapped?
+        """
+
+        return not any(self._tiger_moves())
+
+    @property
+    def winner(self):
+        """
+        Return the winner if the game is over, else return None
+        """
+
+        if self.deadGoats == 5:
+            return self.Player.T
+
+        if self.all_tigers_trapped():
+            return self.Player.G
+
+        return None
