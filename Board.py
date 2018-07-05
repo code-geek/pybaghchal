@@ -40,6 +40,7 @@ class Board(object):
         self.goatsToBePlaced = 20
         self.deadGoats = 0
         self.turn = self.Player.G
+        self.lastMove = ""
 
     def show(self):
         print("""  a   b   c   d   e
@@ -98,9 +99,27 @@ class Board(object):
         self.deadGoats = int(parts[3][1:])
         assert (self.deadGoats in range(6)), "Invalid deadGoats: %d" % self.deadGoats
 
+        self.lastMove = parts[4][1:]
+
         self._set_tiger_positions()
 
     def _set_tiger_positions(self):
         for idx, p in enumerate(self.points):
             if p.get_state() == Point.State.T:
                 self.tigerPos.append(idx)
+
+    @property
+    def position(self):
+        # I'm sorry for this line, but I love Python!
+        pos_string = ''.join(['/' * (n % 5 == 0 and n != 0) + p.get_state().name for n, p in enumerate(self.points)])
+
+        for i in reversed(range(1, 6)):
+            pos_string = pos_string.replace(''.join('E' * i), str(i))
+
+        return "%s %s %s %s %s" % (
+            ''.join(pos_string),
+            self.turn.name.lower(),
+            'g%d' % self.goatsToBePlaced,
+            'c%d' % self.deadGoats,
+            'm%s' % self.lastMove
+        )
