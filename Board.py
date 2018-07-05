@@ -210,14 +210,7 @@ class Board(object):
             for d in Board.directions
         )
 
-    def movable_tigers(self):
-        """
-        Returns the number of movable tigers
-        """
-
-        return sum(self._tiger_moves())
-
-    def all_tigers_trapped(self):
+    def _all_tigers_trapped(self):
         """
         Are all tigers trapped?
         """
@@ -233,7 +226,7 @@ class Board(object):
         if self.deadGoats == 5:
             return self.Player.T
 
-        if self.all_tigers_trapped():
+        if self._all_tigers_trapped():
             return self.Player.G
 
         return None
