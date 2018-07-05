@@ -23,14 +23,16 @@ class Board(object):
             for i in self.tigerPos:
                 self.points[i].set_state("T")
 
-    def point(self, coord):
-        file = coord[0]
-        rank = coord[1]
-        assert len(coord) == 2 and not file.isdigit() and rank.isdigit(), "Invalid Coordinates"
+    def point_index(self, coord):
+        file, rank = coord
+
+        # check if the coordinates are valid
+        assert len(coord) == 2 and file in list('ABCDE') and int(
+            rank) in range(1, 6), "Invalid Coordinates: %s" % str(coord)
 
         # Top left point on the board is A1
         # A1 = point[0], E5 = point[24]
-        return self.points[(Point.File[file].value - 1) + (int(rank) - 1) * 5]
+        return (Point.File[file].value - 1) + (int(rank) - 1) * 5
 
     def reset(self):
         """Resets the board"""
@@ -127,4 +129,26 @@ class Board(object):
             'g%d' % self.goatsToBePlaced,
             'c%d' % self.deadGoats,
             'm%s' % self.lastMove
+        )
+
+    def is_movable(self, from_point, to_point):
+        """
+        Is a piece movable from one particular point to another?
+        eg. 'A1' to 'B2'
+        """
+
+        # point_index checks if the points are valid
+        from_point = self.point_index(from_point)
+        to_point = self.point_index(to_point)
+
+        return (
+            # to_point must be empty
+            self.points[to_point].get_state() == Point.State.E and
+            # the points must be traversable
+            (
+                # horizontal and vertical
+                abs(from_point - to_point) in [1, 5] or\
+                # diagonal (allowed only from even points)
+                ((from_point % 2 == 0) and abs(from_point - to_point) in [4, 6])
+            )
         )
