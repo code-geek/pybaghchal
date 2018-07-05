@@ -1,5 +1,3 @@
-import re
-
 from Point import Point
 from enum import Enum
 
