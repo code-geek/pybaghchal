@@ -44,7 +44,7 @@ class Board(object):
     def reset(self):
         """Resets the board"""
 
-        self.points = [Point(i, j) for i in range(1, 6) for j in range(1, 6)]
+        self.points = [Point(i) for i in range(25)]
         self.tigerPos = []
         self.goatsToBePlaced = 20
         self.deadGoats = 0
@@ -137,18 +137,22 @@ class Board(object):
             'm%s' % self.lastMove
         )
 
+    @staticmethod
+    def valid(index):
+        """
+        Returns whether a given point index is valid.
+        """
+
+        return (index >= 0 and index <= 25)
+
     def is_movable(self, from_point, to_point):
         """
         Is a piece movable from one particular point to another?
         eg. 'A1' to 'B2'
         """
 
-        # point_index checks if the points are valid points on the board
-        from_point = self.point_index(from_point)
-        to_point = self.point_index(to_point)
-
-        # check if both points are on the board
-        if from_point not in range(25) or to_point not in range(25):
+        # check if both points are valid
+        if not (Board.valid(from_point) and Board.valid(to_point)):
             return False
 
         return (
@@ -169,12 +173,8 @@ class Board(object):
         eg. 'C1' to 'E1'
         """
 
-        # point_index checks if the points are valid points on the board
-        from_point = self.point_index(from_point)
-        to_point = self.point_index(to_point)
-
-        # check if both points are on the board
-        if from_point not in range(25) or to_point not in range(25):
+        # check if both points are valid
+        if not (Board.valid(from_point) and Board.valid(to_point)):
             return False
 
         # check for a valid midpoint

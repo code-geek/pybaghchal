@@ -8,6 +8,7 @@ class Engine(object):
     Takes a board position and returns the best move
     """
 
+    # f = from, t = to
     Move = namedtuple('Move', ['f', 't'])
 
     def __init__(self, position=None):
