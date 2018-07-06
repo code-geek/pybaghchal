@@ -5,6 +5,26 @@ from enum import Enum
 class Board(object):
     """A baghchal board"""
 
+    # possible connections from one point to another
+    _move_connections = {
+        0: [1, 5, 6], 1: [2, 0, 6], 2: [3, 1, 7, 6, 8], 3: [4, 2, 8], 4: [3, 9, 8],
+        5: [6, 10, 0], 6: [7, 5, 11, 1, 10, 2, 12, 0], 7: [8, 6, 12, 2], 8: [9, 7, 13, 3, 12, 4, 14, 2], 9: [8, 14, 4],
+        10: [11, 15, 5, 6, 16], 11: [12, 10, 16, 6], 12: [13, 11, 17, 7, 16, 8, 18, 6], 13: [14, 12, 18, 8],
+        14: [13, 19, 9, 18, 8],
+        15: [16, 20, 10], 16: [17, 15, 21, 11, 20, 12, 22, 10], 17: [18, 16, 22, 12],
+        18: [19, 17, 23, 13, 22, 14, 24, 12], 19: [18, 24, 14],
+        20: [21, 15, 16], 21: [22, 20, 16], 22: [23, 21, 17, 18, 16], 23: [24, 22, 18], 24: [23, 19, 18]
+    }
+
+    _capture_connections = {
+        0: [2, 10, 12], 1: [3, 11], 2: [4, 0, 12, 10, 14], 3: [1, 13], 4: [2, 14, 12],
+        5: [7, 15], 6: [8, 16, 18], 7: [9, 5, 17], 8: [6, 18, 16], 9: [7, 19],
+        10: [12, 20, 0, 2, 22], 11: [13, 21, 1], 12: [14, 10, 22, 2, 20, 4, 24, 0],
+        13: [11, 23, 3], 14: [12, 24, 4, 22, 2],
+        15: [17, 5], 16: [18, 6, 8], 17: [19, 15, 7], 18: [16, 8, 6], 19: [17, 9],
+        20: [22, 10, 12], 21: [23, 11], 22: [24, 20, 12, 14, 10], 23: [21, 13], 24: [22, 14, 12]
+    }
+
     class Player(Enum):
         T = 1
         G = 2
@@ -143,7 +163,7 @@ class Board(object):
         Returns whether a given point index is valid.
         """
 
-        return (index >= 0 and index <= 25)
+        return (index >= 0 and index < 25)
 
     def is_movable(self, from_point, to_point):
         """
@@ -156,15 +176,10 @@ class Board(object):
             return False
 
         return (
+            # connection must exist
+            to_point in Board._move_connections[from_point] and
             # to_point must be empty
-            self.points[to_point].get_state() == Point.State.E and
-            # the points must be traversable
-            (
-                # horizontal and vertical
-                abs(from_point - to_point) in [1, 5] or\
-                # diagonal (allowed only from even points)
-                ((from_point % 2 == 0) and abs(from_point - to_point) in [4, 6])
-            )
+            self.points[to_point].get_state() == Point.State.E
         )
 
     def can_capture(self, from_point, to_point):
@@ -184,19 +199,14 @@ class Board(object):
         mid_point = int((from_point + to_point) / 2)
 
         return (
+            # connection must exist
+            to_point in Board._capture_connections[from_point] and
             # from_point must be a tiger
             self.points[from_point].get_state() == Point.State.T and
             # mid_point must be a goat
             self.points[mid_point].get_state() == Point.State.G and
             # to_point must be empty
-            self.points[to_point].get_state() == Point.State.E and
-            # the points must be one point apart
-            (
-                # horizontal and vertical
-                abs(from_point - to_point) in [2, 10] or\
-                # diagonal (allowed only from even points)
-                ((from_point % 2 == 0) and abs(from_point - to_point) in [8, 12])
-            )
+            self.points[to_point].get_state() == Point.State.E
         )
 
     def _tiger_moves(self):
