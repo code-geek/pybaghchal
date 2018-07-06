@@ -1,4 +1,6 @@
 from collections import namedtuple
+from enum import Enum
+
 from Point import Point
 from Board import Board
 
@@ -8,8 +10,24 @@ class Engine(object):
     Takes a board position and returns the best move
     """
 
+    class MoveType(Enum):
+        P = 1  # Place
+        M = 2  # Move
+        C = 3  # Capture
+
+        def __repr__(self):
+            if self.name == "P":
+                return "Place"
+            elif self.name == "M":
+                return "Move"
+            else:
+                return "Capture"
+
+        def __str__(self):
+            return self.__repr__()
+
     # f = from, t = to
-    Move = namedtuple('Move', ['f', 't'])
+    Move = namedtuple('Move', ['f', 't', 'mt'])
 
     def __init__(self, position=None):
         super(Engine, self).__init__()
@@ -17,7 +35,7 @@ class Engine(object):
 
     def _placements(self):
         return [
-            Engine.Move(point.index, point.index)
+            Engine.Move(point.index, point.index, Engine.MoveType.P)
             for point in self.board.points
             if point.get_state() == Point.State.E
         ]
@@ -35,7 +53,7 @@ class Engine(object):
             pieces = self.board.tigerPos
 
         return [
-            Engine.Move(p, p + d)
+            Engine.Move(p, p + d, Engine.MoveType.M)
             for p in pieces
             for d in Board.directions
             if self.board.is_movable(p, p + d)
@@ -43,7 +61,7 @@ class Engine(object):
 
     def _captures(self):
         return [
-            Engine.Move(t, t + 2 * d)
+            Engine.Move(t, t + 2 * d, Engine.MoveType.C)
             for t in self.board.tigerPos
             for d in Board.directions
             if self.board.can_capture(t, t + 2 * d)
