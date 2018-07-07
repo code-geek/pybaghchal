@@ -17,8 +17,18 @@ class Point(object):
     #   | / | \ | / | \ |
     # 5 T               T
 
-    _coord_to_index = {'%s%s' % (chr(i + 65), j + 1): (i + j * 5) for i in range(5) for j in range(5)}
-    _index_to_coord = {v: k for k, v in _coord_to_index.items()}
+    # hardcoding these so they're more readable and doesn't need to be computed every time
+    _coord_to_index = {'A1': 0, 'A2': 5, 'A3': 10, 'A4': 15, 'A5': 20,
+                       'B1': 1, 'B2': 6, 'B3': 11, 'B4': 16, 'B5': 21,
+                       'C1': 2, 'C2': 7, 'C3': 12, 'C4': 17, 'C5': 22,
+                       'D1': 3, 'D2': 8, 'D3': 13, 'D4': 18, 'D5': 23,
+                       'E1': 4, 'E2': 9, 'E3': 14, 'E4': 19, 'E5': 24}
+
+    _index_to_coord = {0: 'A1', 1: 'B1', 2: 'C1', 3: 'D1', 4: 'E1',
+                       5: 'A2', 6: 'B2', 7: 'C2', 8: 'D2', 9: 'E2',
+                       10: 'A3', 11: 'B3', 12: 'C3', 13: 'D3', 14: 'E3',
+                       15: 'A4', 16: 'B4', 17: 'C4', 18: 'D4', 19: 'E4',
+                       20: 'A5', 21: 'B5', 22: 'C5', 23: 'D5', 24: 'E5'}
 
     class State(Enum):
         """What's on a point"""
@@ -43,6 +53,10 @@ class Point(object):
     @property
     def coord(self):
         return self._index_to_coord[self.index]
+
+    @classmethod
+    def get_index(cls, coord):
+        return cls._coord_to_index[coord]
 
     def __str__(self):
         return self.coord
