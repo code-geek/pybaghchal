@@ -188,7 +188,7 @@ class Engine(object):
 
         return 30 * self.movable_tigers() + 50 * self.board.deadGoats - depth
 
-    def minmax(self, depth=0, alpha=0, beta=0):
+    def minmax(self, is_max=True, depth=0, alpha=0, beta=0):
         score = self.evaluate(depth)
 
         # if a leaf node is reached, return the score
@@ -196,7 +196,7 @@ class Engine(object):
             return score
 
         # find the minimum attainable value for the Goat
-        if self.board.turn == Board.Player.G:
+        if not is_max:
             best_val = Engine.INF
 
             for move in self.generate_move_list():
@@ -204,7 +204,7 @@ class Engine(object):
                 self._make_move(move)
 
                 # go deeper in the search tree recursively
-                value = self.minmax(depth + 1, alpha, beta)
+                value = self.minmax(True, depth + 1, alpha, beta)
                 best_val = min(best_val, value)
                 beta = min(beta, best_val)
 
@@ -226,7 +226,7 @@ class Engine(object):
                 self._make_move(move)
 
                 # go deeper in the search tree recursively
-                value = self.minmax(depth + 1, alpha, beta)
+                value = self.minmax(False, depth + 1, alpha, beta)
                 best_val = max(best_val, value)
                 alpha = max(alpha, best_val)
 
@@ -248,7 +248,7 @@ class Engine(object):
             self._make_move(move)
 
             # is it the best move we've found so far?
-            if self.minmax() > score:
+            if self.minmax(is_max=True) > score:
                 best_move = move
 
             # revert the move
