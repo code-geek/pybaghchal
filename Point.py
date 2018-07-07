@@ -61,6 +61,11 @@ class Point(object):
         ), "Invalid Coordinates: %s" % str(coord)
         return cls._coord_to_index[coord]
 
+    @classmethod
+    def get_coord(cls, index):
+        assert 0 <= index < 25, "Invalid index: %d" % index
+        return cls._index_to_coord[index]
+
     def __str__(self):
         return self.coord
 
