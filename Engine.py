@@ -31,7 +31,7 @@ class Engine(object):
     # f = from, t = to, mt = MoveType
     Move = namedtuple('Move', ['f', 't', 'mt'])
 
-    def __init__(self, position=None, depth=15):
+    def __init__(self, position=None, depth=5):
         super(Engine, self).__init__()
         self.board = Board(position)
         self.depth = depth
