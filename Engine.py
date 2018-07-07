@@ -29,11 +29,15 @@ class Engine(object):
             return self.__repr__()
 
     # f = from, t = to, mt = MoveType
-    Move = namedtuple('Move', ['f', 't', 'mt'])
+    nt = namedtuple('Move', ['f', 't', 'mt'])
 
-    def __init__(self, position=None, depth=5):
+    class Move(nt):
+        def __repr__(self):
+            return "%s-%s-%s" % (Point.get_coord(self.f), Point.get_coord(self.t), self.mt.name)
+
+    def __init__(self, board, depth=5):
         super(Engine, self).__init__()
-        self.board = Board(position)
+        self.board = board
         self.depth = depth
 
     def _placements(self):
