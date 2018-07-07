@@ -17,7 +17,7 @@ class Point(object):
     #   | / | \ | / | \ |
     # 5 T               T
 
-    # hardcoding these so they're more readable and doesn't need to be computed every time
+    # hardcoding these so they're more readable and don't need to be computed every time
     _coord_to_index = {'A1': 0, 'A2': 5, 'A3': 10, 'A4': 15, 'A5': 20,
                        'B1': 1, 'B2': 6, 'B3': 11, 'B4': 16, 'B5': 21,
                        'C1': 2, 'C2': 7, 'C3': 12, 'C4': 17, 'C5': 22,
