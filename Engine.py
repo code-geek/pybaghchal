@@ -173,10 +173,10 @@ class Engine(object):
 
         # turn = Tiger
         else:
-            # moves
-            move_list.extend(self._movements())
             # captures
             move_list.extend(self._captures())
+            # moves
+            move_list.extend(self._movements())
 
         return move_list
 
