@@ -46,21 +46,6 @@ class Board(object):
             for i in self.tigerPos:
                 self.points[i].set_state("T")
 
-    def point_index(self, coord):
-        # if an integer is passed, check if it's valid and return it
-        if type(coord) == int:
-            return coord
-
-        file, rank = coord
-
-        # check if the coordinates are valid
-        assert len(coord) == 2 and file in list('ABCDE') and int(
-            rank) in range(1, 6), "Invalid Coordinates: %s" % str(coord)
-
-        # Top left point on the board is A1
-        # A1 = point[0], E5 = point[24]
-        return (Point.File[file].value - 1) + (int(rank) - 1) * 5
-
     def reset(self):
         """Resets the board"""
 
