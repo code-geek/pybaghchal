@@ -132,9 +132,21 @@ class Board(object):
         self._set_tiger_positions()
 
     def _set_tiger_positions(self):
+        """
+        Finds the tigers on the board and saves their positions
+        """
+
+        self.tigerPos = []
         for idx, p in enumerate(self.points):
             if p.get_state() == Point.State.T:
                 self.tigerPos.append(idx)
+        assert len(self.tigerPos) == 4
+
+    def change_tiger_position(self, f, t):
+        """
+        Changes a certain tiger's position in self.tigerPos
+        """
+        pass
 
     @property
     def position(self):
@@ -222,7 +234,7 @@ class Board(object):
 
     def _all_tigers_trapped(self):
         """
-        Are all tigers trapped?
+        Returns True if there is a valid move for a tiger remaining on the board
         """
 
         return not any(self._tiger_moves())
