@@ -31,7 +31,7 @@ class Engine(object):
     # f = from, t = to, mt = MoveType
     Move = namedtuple('Move', ['f', 't', 'mt'])
 
-    def __init__(self, position=None, depth=5):
+    def __init__(self, position=None, depth=15):
         super(Engine, self).__init__()
         self.board = Board(position)
         self.depth = depth
@@ -202,20 +202,20 @@ class Engine(object):
             for move in self.generate_move_list():
                 # first make the move
                 self._make_move(move)
-                # evaluate the resulting position
-                value = self.minmax(depth + 1)
 
-                # if value < beta:
-                #     beta = value
-
+                # go deeper in the search tree recursively
+                value = self.minmax(depth + 1, alpha, beta)
                 best_val = min(best_val, value)
+                beta = min(beta, best_val)
+
                 # then revert the move
                 self._revert_move(move)
 
-                return best_val
+                # ab pruning
+                if beta <= alpha:
+                    break
 
-                # if alpha >= beta:
-                #     return beta
+            return best_val
 
         # find the maximum attainable value for the maximizer
         else:
@@ -224,19 +224,20 @@ class Engine(object):
             for move in self.generate_move_list():
                 # first make the move
                 self._make_move(move)
-                # evaluate the resulting position
-                value = self.minmax(depth + 1)
 
-                # if value < beta:
-                #     beta = value
-
+                # go deeper in the search tree recursively
+                value = self.minmax(depth + 1, alpha, beta)
                 best_val = max(best_val, value)
+                alpha = max(alpha, best_val)
+
                 # then revert the move
                 self._revert_move(move)
 
-            return best_val
+                # ab pruning
+                if beta <= alpha:
+                    break
 
-        # return alpha if self.board.turn == Board.Player.G else beta
+            return best_val
 
     def find_best_move(self):
         score = 0
