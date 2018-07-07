@@ -56,6 +56,9 @@ class Point(object):
 
     @classmethod
     def get_index(cls, coord):
+        assert (
+            len(coord) == 2 and coord[0] in list('ABCDE') and int(coord[1]) in range(1, 6)
+        ), "Invalid Coordinates: %s" % str(coord)
         return cls._coord_to_index[coord]
 
     def __str__(self):
