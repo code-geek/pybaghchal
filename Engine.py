@@ -10,7 +10,7 @@ class Engine(object):
     Takes a board position and returns the best move
     """
 
-    INF = 100000
+    INF = 1000000
 
     class MoveType(Enum):
         P = 1  # Place
