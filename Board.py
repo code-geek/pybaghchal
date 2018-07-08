@@ -160,7 +160,7 @@ class Board(object):
         Returns whether a given point index is valid.
         """
 
-        return (index >= 0 and index < 25)
+        return 0 <= index < 25
 
     def is_movable(self, from_point, to_point):
         """
