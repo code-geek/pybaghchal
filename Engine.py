@@ -273,7 +273,6 @@ class Engine(object):
         return self.best_move
 
     def make_random_move(self):
-        import random
         move_list = self.generate_move_list()
         # pick a random move
         move = random.choice(move_list)
