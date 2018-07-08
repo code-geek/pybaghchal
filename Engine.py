@@ -1,3 +1,5 @@
+import random
+
 from collections import namedtuple
 from enum import Enum
 
@@ -280,5 +282,8 @@ class Engine(object):
         return move
 
     def make_best_move(self):
-        move = self.find_best_move()
+        if self.board.turn == Board.Player.G:
+            move = self.best_goat_move()
+        else:
+            move = self.best_tiger_move()
         self._make_move(move)
