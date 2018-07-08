@@ -39,6 +39,7 @@ class Engine(object):
         super(Engine, self).__init__()
         self.board = board
         self.depth = depth
+        self.best_move = None
 
     def _placements(self):
         return [
