@@ -48,7 +48,7 @@ def play():
     print(game.board.winner)
 
 
-def play_random_game():
+def ai_vs_ai():
     game = Game()
     # move_num = 1
     while not game.board.winner:
