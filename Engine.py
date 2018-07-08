@@ -156,7 +156,7 @@ class Engine(object):
 
         return sum(int(self._movable(t)) for t in self.board.tigerPos)
 
-    def generate_move_list(self):
+    def generate_move_list(self, rdm=True):
         """
         Generate a list of all moves for the board and turn
         """
@@ -172,12 +172,26 @@ class Engine(object):
             else:
                 move_list.extend(self._movements())
 
+            # randomly shuffling the move list
+            # so the ai doesn't make the same move every time
+
+            if rdm:
+                random.shuffle(move_list)
         # turn = Tiger
         else:
             # captures
-            move_list.extend(self._captures())
-            # moves
-            move_list.extend(self._movements())
+            # captures are kept before movements
+            # to improve the efficiency of ab pruning
+            moves = self._captures()
+            if rdm:
+                random.shuffle(moves)
+            move_list.extend(moves)
+
+            # movements
+            moves = self._movements()
+            if rdm:
+                random.shuffle(moves)
+            move_list.extend(moves)
 
         return move_list
 
