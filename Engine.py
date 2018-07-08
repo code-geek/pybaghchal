@@ -200,14 +200,16 @@ class Engine(object):
         Returns a numeric evaluation of the position
         Written from the perspective of Tiger
         """
-        if self.board.winner == Board.Player.G:
+        winner = self.board.winner
+        if not winner:
+            return 3 * self.movable_tigers() + 50 * self.board.deadGoats - depth
+
+        if winner == Board.Player.G:
             return -Engine.INF
-        elif self.board.winner == Board.Player.T:
+        elif winner == Board.Player.T:
             return Engine.INF
 
-        return 30 * self.movable_tigers() + 50 * self.board.deadGoats - depth
-
-    def minmax(self, is_max=True, depth=0, alpha=0, beta=0):
+    def minmax(self, is_max=True, depth=0, alpha=-INF, beta=INF):
         score = self.evaluate(depth)
 
         # if a leaf node is reached, return the score
