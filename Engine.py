@@ -216,66 +216,59 @@ class Engine(object):
         if depth == self.depth or abs(score) == Engine.INF:
             return score
 
-        # find the minimum attainable value for the Goat
+        # find the minimum attainable value for the minimizer
         if not is_max:
-            best_val = Engine.INF
-
             for move in self.generate_move_list():
                 # first make the move
                 self._make_move(move)
 
                 # go deeper in the search tree recursively
                 value = self.minmax(True, depth + 1, alpha, beta)
-                best_val = min(best_val, value)
-                beta = min(beta, best_val)
+
+                if value < beta:
+                    beta = value
+                    if depth == 0:
+                        self.best_move = move
 
                 # then revert the move
                 self._revert_move(move)
 
                 # ab pruning
-                if beta <= alpha:
-                    break
+                if alpha >= beta:
+                    return beta
 
-            return best_val
+            return beta
 
         # find the maximum attainable value for the maximizer
         else:
-            best_val = -Engine.INF
-
             for move in self.generate_move_list():
                 # first make the move
                 self._make_move(move)
 
                 # go deeper in the search tree recursively
                 value = self.minmax(False, depth + 1, alpha, beta)
-                best_val = max(best_val, value)
-                alpha = max(alpha, best_val)
+
+                if value > alpha:
+                    alpha = value
+                    if depth == 0:
+                        self.best_move = move
 
                 # then revert the move
                 self._revert_move(move)
 
                 # ab pruning
-                if beta <= alpha:
-                    break
+                if alpha >= beta:
+                    return alpha
 
-            return best_val
+            return alpha
 
-    def find_best_move(self):
-        score = 0
-        best_move = None
+    def best_tiger_move(self):
+        self.minmax()
+        return self.best_move
 
-        for move in self.generate_move_list():
-            # make the move
-            self._make_move(move)
-
-            # is it the best move we've found so far?
-            if self.minmax(is_max=True) > score:
-                best_move = move
-
-            # revert the move
-            self._revert_move(move)
-
-        return best_move
+    def best_goat_move(self):
+        self.minmax(is_max=False)
+        return self.best_move
 
     def make_random_move(self):
         import random
