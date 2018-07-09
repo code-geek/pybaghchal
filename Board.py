@@ -31,6 +31,9 @@ class Board(object):
         T = 1
         G = 2
 
+        def __str__(self):
+            return "Goats" if self.name == "G" else "Tigers"
+
     class MoveType(Enum):
         P = 1  # Place
         M = 2  # Move
@@ -422,3 +425,11 @@ class Board(object):
             move_list.extend(self._movements())
 
         return move_list
+
+    def copy(self):
+        board = Board()
+        board.points = self.points
+        board.turn = self.turn
+        board.deadGoats = self.deadGoats
+        board.goatsToBePlaced = self.goatsToBePlaced
+        return board
