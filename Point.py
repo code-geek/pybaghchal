@@ -50,10 +50,6 @@ class Point(object):
     def print_state(self):
         return " " if self.state.name == "E" else self.state.name
 
-    @property
-    def coord(self):
-        return self._index_to_coord[self.index]
-
     @classmethod
     def get_index(cls, coord):
         assert (
@@ -65,6 +61,10 @@ class Point(object):
     def get_coord(cls, index):
         assert 0 <= index < 25, "Invalid index: %d" % index
         return cls._index_to_coord[index]
+
+    @property
+    def coord(self):
+        return Point.get_coord(self.index)
 
     def __str__(self):
         return self.coord
