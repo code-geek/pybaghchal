@@ -43,13 +43,6 @@ class Game(object):
         self.board.make_move(move)
         return move
 
-    def make_best_move(self):
-        if self.board.turn == Board.Player.G:
-            move = self.engine.best_goat_move()
-        else:
-            move = self.engine.best_tiger_move()
-        self.board.make_move(move)
-
 
 def play():
     game = Game()
@@ -70,10 +63,10 @@ def ai_vs_ai():
     while not game.board.winner:
         # print(move_num)
         # move_num += 1
-        game.make_best_move()
+        game.engine.make_best_move()
         game.board.show()
 
     return game.board.winner
 
 
-ai_vs_ai()
+play()

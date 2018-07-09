@@ -109,7 +109,10 @@ class UIGame(object):
             i, j = self.canvas_to_logical(ev.x, ev.y)
             to_idx = Point.get_index(UIGame.get_ui_coord(i, j))
 
-            if self.board.is_movable(self.from_idx, to_idx) and self.board.points[self.from_idx].get_state() == Point.State.G:
+            if (
+                    self.board.is_movable(self.from_idx, to_idx) and
+                    self.board.points[self.from_idx].get_state() == Point.State.G
+            ):
                 move = Board.Move(f=self.from_idx, t=to_idx, mt=Board.MoveType.M)
             else:
                 move = None
@@ -128,14 +131,17 @@ class UIGame(object):
             to_idx = Point.get_index(UIGame.get_ui_coord(i, j))
 
             # determine if this is a move or a capture
-            if self.board.is_movable(self.from_idx, to_idx) and self.board.points[self.from_idx].get_state() == Point.State.T:
+            if (
+                    self.board.is_movable(self.from_idx, to_idx) and
+                    self.board.points[self.from_idx].get_state() == Point.State.T
+            ):
                 move = Board.Move(f=self.from_idx, t=to_idx, mt=Board.MoveType.M)
             elif self.board.can_capture(self.from_idx, to_idx):
                 move = Board.Move(f=self.from_idx, t=to_idx, mt=Board.MoveType.C)
             else:
                 move = None
 
-            from_idx = None
+            self.from_idx = None
             self.apply_move(move)
 
     def place_goat(self, ev):
