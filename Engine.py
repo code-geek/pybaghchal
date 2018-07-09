@@ -1,9 +1,3 @@
-import random
-
-from collections import namedtuple
-from enum import Enum
-
-from Point import Point
 from Board import Board
 
 
@@ -14,188 +8,11 @@ class Engine(object):
 
     INF = 1000000
 
-    class MoveType(Enum):
-        P = 1  # Place
-        M = 2  # Move
-        C = 3  # Capture
-
-        def __repr__(self):
-            if self.name == "P":
-                return "Place"
-            elif self.name == "M":
-                return "Move"
-            else:
-                return "Capture"
-
-        def __str__(self):
-            return self.__repr__()
-
-    # f = from, t = to, mt = MoveType
-    nt = namedtuple('Move', ['f', 't', 'mt'])
-
-    class Move(nt):
-        def __repr__(self):
-            return "%s-%s-%s" % (Point.get_coord(self.f), Point.get_coord(self.t), self.mt.name)
-
     def __init__(self, board, depth=5):
         super(Engine, self).__init__()
         self.board = board
         self.depth = depth
         self.best_move = None
-
-    def _placements(self):
-        return [
-            Engine.Move(point.index, point.index, Engine.MoveType.P)
-            for point in self.board.points
-            if point.get_state() == Point.State.E
-        ]
-
-    def _movements(self):
-        """
-        Returns the possible movements (excluding captures)
-        for the board and the turn
-        """
-
-        # since we don't have goat positions, we just loop to find the goats
-        if self.board.turn == Board.Player.G:
-            pieces = [p.index for p in self.board.points if p.get_state() == Point.State.G]
-        else:
-            pieces = self.board.tigerPos
-
-        return [
-            Engine.Move(p, p + d, Engine.MoveType.M)
-            for p in pieces
-            for d in Board.directions
-            if self.board.is_movable(p, p + d)
-        ]
-
-    def _captures(self):
-        return [
-            Engine.Move(t, t + 2 * d, Engine.MoveType.C)
-            for t in self.board.tigerPos
-            for d in Board.directions
-            if self.board.can_capture(t, t + 2 * d)
-        ]
-
-    def _movable(self, t_pos):
-        """
-        Returns whether a particular tiger is movable
-        """
-
-        return any(
-            self.board.is_movable(t_pos, t_pos + d) or self.board.can_capture(t_pos, t_pos + 2 * d)
-            for d in Board.directions
-        )
-
-    def _make_move(self, move):
-        """
-        Makes the given move on the board
-        """
-
-        # placement
-        if move.mt == Engine.MoveType.P:
-            self.board.points[move.t].set_state("G")
-            self.board.turn = Board.Player.T
-            self.board.goatsToBePlaced -= 1
-
-        # movement
-        elif move.mt == Engine.MoveType.M:
-            if self.board.turn == Board.Player.G:
-                self.board.points[move.t].set_state("G")
-                self.board.points[move.f].set_state("E")
-                self.board.turn = Board.Player.T
-            else:
-                self.board.points[move.t].set_state("T")
-                self.board.points[move.f].set_state("E")
-                self.board.turn = Board.Player.G
-                self.board._set_tiger_positions()
-
-        # capture
-        elif move.mt == Engine.MoveType.C:
-            self.board.points[move.f].set_state("E")
-            self.board.points[(move.t + move.f) // 2].set_state("E")
-            self.board.points[move.t].set_state("T")
-            self.board.turn = Board.Player.G
-            self.board.deadGoats += 1
-            self.board._set_tiger_positions()
-
-    def _revert_move(self, move):
-        """
-        Reverts the given move on the board
-        """
-
-        # placement
-        if move.mt == Engine.MoveType.P:
-            self.board.points[move.t].set_state("E")
-            self.board.turn = Board.Player.G
-            self.board.goatsToBePlaced += 1
-
-        # movement
-        elif move.mt == Engine.MoveType.M:
-            if self.board.turn == Board.Player.G:
-                self.board.points[move.f].set_state("T")
-                self.board.points[move.t].set_state("E")
-                self.board.turn = Board.Player.T
-                self.board._set_tiger_positions()
-            else:
-                self.board.points[move.f].set_state("G")
-                self.board.points[move.t].set_state("E")
-                self.board.turn = Board.Player.G
-
-        # capture
-        elif move.mt == Engine.MoveType.C:
-            self.board.points[move.f].set_state("T")
-            self.board.points[(move.t + move.f) // 2].set_state("G")
-            self.board.points[move.t].set_state("E")
-            self.board.turn = Board.Player.T
-            self.board.deadGoats -= 1
-            self.board._set_tiger_positions()
-
-    def movable_tigers(self):
-        """
-        Returns the number of movable tigers on the board
-        """
-
-        return sum(int(self._movable(t)) for t in self.board.tigerPos)
-
-    def generate_move_list(self, rdm=True):
-        """
-        Generate a list of all moves for the board and turn
-        """
-
-        move_list = []
-
-        # turn = Goat
-        if self.board.turn == Board.Player.G:
-            # placement phase
-            if self.board.goatsToBePlaced > 0:
-                move_list.extend(self._placements())
-            # movement phase
-            else:
-                move_list.extend(self._movements())
-
-            # randomly shuffling the move list
-            # so the ai doesn't make the same move every time
-
-            if rdm:
-                random.shuffle(move_list)
-        # turn = Tiger
-        else:
-            # captures
-            # captures are kept before movements
-            # to improve the efficiency of ab pruning
-            moves = self._captures()
-            if rdm:
-                random.shuffle(moves)
-            move_list.extend(moves)
-
-            # movements
-            moves = self._movements()
-            if rdm:
-                random.shuffle(moves)
-            move_list.extend(moves)
-
-        return move_list
 
     def evaluate(self, depth=0):
         """
@@ -204,7 +21,7 @@ class Engine(object):
         """
         winner = self.board.winner
         if not winner:
-            return 3 * self.movable_tigers() + 50 * self.board.deadGoats - depth
+            return 3 * self.board.movable_tigers() + 50 * self.board.deadGoats - depth
 
         if winner == Board.Player.G:
             return -Engine.INF
@@ -220,20 +37,20 @@ class Engine(object):
 
         # find the minimum attainable value for the minimizer
         if not is_max:
-            for move in self.generate_move_list():
+            for move in self.board.generate_move_list():
                 # first make the move
-                self._make_move(move)
+                self.board.make_move(move)
 
                 # go deeper in the search tree recursively
                 value = self.minmax(True, depth + 1, alpha, beta)
 
                 if value < beta:
                     beta = value
-                    if depth == 0:
+                    if depth == 0 and not is_max:
                         self.best_move = move
 
                 # then revert the move
-                self._revert_move(move)
+                self.board.revert_move(move)
 
                 # ab pruning
                 if alpha >= beta:
@@ -243,20 +60,20 @@ class Engine(object):
 
         # find the maximum attainable value for the maximizer
         else:
-            for move in self.generate_move_list():
+            for move in self.board.generate_move_list():
                 # first make the move
-                self._make_move(move)
+                self.board.make_move(move)
 
                 # go deeper in the search tree recursively
                 value = self.minmax(False, depth + 1, alpha, beta)
 
                 if value > alpha:
                     alpha = value
-                    if depth == 0:
+                    if depth == 0 and is_max:
                         self.best_move = move
 
                 # then revert the move
-                self._revert_move(move)
+                self.board.revert_move(move)
 
                 # ab pruning
                 if alpha >= beta:
@@ -271,18 +88,3 @@ class Engine(object):
     def best_goat_move(self):
         self.minmax(is_max=False)
         return self.best_move
-
-    def make_random_move(self):
-        move_list = self.generate_move_list()
-        # pick a random move
-        move = random.choice(move_list)
-        # make the move
-        self._make_move(move)
-        return move
-
-    def make_best_move(self):
-        if self.board.turn == Board.Player.G:
-            move = self.best_goat_move()
-        else:
-            move = self.best_tiger_move()
-        self._make_move(move)

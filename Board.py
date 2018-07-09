@@ -1,5 +1,7 @@
-from Point import Point
+from collections import namedtuple
 from enum import Enum
+
+from Point import Point
 
 
 class Board(object):
@@ -28,6 +30,29 @@ class Board(object):
     class Player(Enum):
         T = 1
         G = 2
+
+    class MoveType(Enum):
+        P = 1  # Place
+        M = 2  # Move
+        C = 3  # Capture
+
+        def __repr__(self):
+            if self.name == "P":
+                return "Place"
+            elif self.name == "M":
+                return "Move"
+            else:
+                return "Capture"
+
+        def __str__(self):
+            return self.__repr__()
+
+    # f = from, t = to, mt = MoveType
+    nt = namedtuple('Move', ['f', 't', 'mt'])
+
+    class Move(nt):
+        def __repr__(self):
+            return "%s-%s-%s" % (Point.get_coord(self.f), Point.get_coord(self.t), self.mt.name)
 
     # horizontal (1, -1) # vertical (5, -5) # diagonal (4, -4, 6, -6)
     directions = [1, -1, 5, -5, 4, -4, 6, -6]
@@ -71,11 +96,12 @@ class Board(object):
         print("Remaining Goats: %d" % self.goatsToBePlaced)
         print("Dead Goats: %d\n" % self.deadGoats)
 
-    def _get_full_position(self, pos_string):
+    @staticmethod
+    def _get_full_position(pos_string):
         """
         get a full position from a shortened position string:
         eg. 1GG1G/1GGGT/GGGGG/1GTGG/GTGTG gives
-        EGGEGEGGGTGGGGGEGTGGGTGTG
+        list('EGGEGEGGGTGGGGGEGTGGGTGTG')
         """
 
         full_pos = []
@@ -98,7 +124,7 @@ class Board(object):
 
     def parse_position(self, position):
         parts = position.split()
-        full_pos = self._get_full_position(parts[0])
+        full_pos = Board._get_full_position(parts[0])
         assert len(full_pos) == 25
 
         for idx, p in enumerate(full_pos):
@@ -237,3 +263,162 @@ class Board(object):
             return self.Player.G
 
         return None
+
+
+# move related
+    def _placements(self):
+        return [
+            Board.Move(point.index, point.index, Board.MoveType.P)
+            for point in self.points
+            if point.get_state() == Point.State.E
+        ]
+
+    def _movements(self):
+        """
+        Returns the possible movements (excluding captures)
+        for the board and the turn
+        """
+
+        # since we don't have goat positions, we just loop to find the goats
+        if self.turn == Board.Player.G:
+            pieces = [p.index for p in self.points if p.get_state() == Point.State.G]
+        else:
+            pieces = self.tigerPos
+
+        return [
+            Board.Move(p, p + d, Board.MoveType.M)
+            for p in pieces
+            for d in Board.directions
+            if self.is_movable(p, p + d)
+        ]
+
+    def _captures(self):
+        return [
+            Board.Move(t, t + 2 * d, Board.MoveType.C)
+            for t in self.tigerPos
+            for d in Board.directions
+            if self.can_capture(t, t + 2 * d)
+        ]
+
+    def _movable(self, t_pos):
+        """
+        Returns whether a particular tiger is movable
+        """
+
+        return any(
+            self.is_movable(t_pos, t_pos + d) or self.can_capture(t_pos, t_pos + 2 * d)
+            for d in Board.directions
+        )
+
+    def make_move(self, move):
+        """
+        Makes the given move on the board
+        """
+
+        # placement
+        if move.mt == Board.MoveType.P:
+            self.points[move.t].set_state("G")
+            self.turn = Board.Player.T
+            self.goatsToBePlaced -= 1
+
+        # movement
+        elif move.mt == Board.MoveType.M:
+            if self.turn == Board.Player.G:
+                self.points[move.t].set_state("G")
+                self.points[move.f].set_state("E")
+                self.turn = Board.Player.T
+            else:
+                self.points[move.t].set_state("T")
+                self.points[move.f].set_state("E")
+                self.turn = Board.Player.G
+                try:
+                    self._set_tiger_positions()
+                except:
+                    print("-------------------ERROR-------------------")
+                    self.show()
+                    print(self.tigerPos)
+                    raise
+
+        # capture
+        elif move.mt == Board.MoveType.C:
+            self.points[move.f].set_state("E")
+            self.points[(move.t + move.f) // 2].set_state("E")
+            self.points[move.t].set_state("T")
+            self.turn = Board.Player.G
+            self.deadGoats += 1
+
+            try:
+                self._set_tiger_positions()
+            except:
+                print("-------------------ERROR-------------------")
+                self.show()
+                print(self.tigerPos)
+                raise
+            # self._set_tiger_positions()
+
+    def revert_move(self, move):
+        """
+        Reverts the given move on the board
+        """
+
+        # placement
+        if move.mt == Board.MoveType.P:
+            self.points[move.t].set_state("E")
+            self.turn = Board.Player.G
+            self.goatsToBePlaced += 1
+
+        # movement
+        elif move.mt == Board.MoveType.M:
+            if self.turn == Board.Player.G:
+                self.points[move.f].set_state("T")
+                self.points[move.t].set_state("E")
+                self.turn = Board.Player.T
+                self._set_tiger_positions()
+            else:
+                self.points[move.f].set_state("G")
+                self.points[move.t].set_state("E")
+                self.turn = Board.Player.G
+
+        # capture
+        elif move.mt == Board.MoveType.C:
+            self.points[move.f].set_state("T")
+            self.points[(move.t + move.f) // 2].set_state("G")
+            self.points[move.t].set_state("E")
+            self.turn = Board.Player.T
+            self.deadGoats -= 1
+            self._set_tiger_positions()
+
+    def movable_tigers(self):
+        """
+        Returns the number of movable tigers on the board
+        """
+
+        return sum(int(self._movable(t)) for t in self.tigerPos)
+
+    def generate_move_list(self, rdm=True):
+        """
+        Generate a list of all moves for the board and turn
+        """
+
+        move_list = []
+
+        # turn = Goat
+        if self.turn == Board.Player.G:
+            # placement phase
+            if self.goatsToBePlaced > 0:
+                move_list.extend(self._placements())
+            # movement phase
+            else:
+                move_list.extend(self._movements())
+
+        # turn = Tiger
+        else:
+            # captures
+            # captures are kept before movements
+            # to improve the efficiency of ab pruning
+            move_list.extend(self._captures())
+
+            # movements
+            move_list.extend(self._movements())
+
+        return move_list

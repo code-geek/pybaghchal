@@ -1,3 +1,4 @@
+import random
 import sys
 
 from Engine import Engine
@@ -27,12 +28,27 @@ class Game(object):
         return idx
 
     def human_move(self):
-        moves = self.engine.generate_move_list()
+        moves = self.board.generate_move_list()
         self.board.show()
         print("Please choose one move from the list.")
         print('\n'.join("%d. %s" % (i, str(move)) for i, move in enumerate(moves)))
 
-        self.engine._make_move(moves[self.input_move()])
+        self.board.make_move(moves[self.input_move()])
+
+    def make_random_move(self):
+        move_list = self.board.generate_move_list()
+        # pick a random move
+        move = random.choice(move_list)
+        # make the move
+        self.board.make_move(move)
+        return move
+
+    def make_best_move(self):
+        if self.board.turn == Board.Player.G:
+            move = self.engine.best_goat_move()
+        else:
+            move = self.engine.best_tiger_move()
+        self.board.make_move(move)
 
 
 def play():
@@ -49,15 +65,15 @@ def play():
 
 
 def ai_vs_ai():
-    game = Game()
+    game = Game('TGGGT/G3G/G3G/G3G/TGGGT g g8 c0 - -')
     # move_num = 1
     while not game.board.winner:
         # print(move_num)
         # move_num += 1
-        game.engine.make_best_move()
+        game.make_best_move()
         game.board.show()
 
     return game.board.winner
 
 
-play()
+ai_vs_ai()
