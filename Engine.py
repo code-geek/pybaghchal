@@ -21,7 +21,7 @@ class Engine(object):
         """
         winner = self.board.winner
         if not winner:
-            return 3 * self.board.movable_tigers() + 50 * self.board.deadGoats - depth
+            return 3 * self.board.movable_tigers() + 7 * self.board.deadGoats - depth
 
         if winner == Board.Player.G:
             return -Engine.INF
@@ -44,9 +44,9 @@ class Engine(object):
                 # go deeper in the search tree recursively
                 value = self.minmax(True, depth + 1, alpha, beta)
 
-                if value < beta:
+                if value <= beta:
                     beta = value
-                    if depth == 0 and not is_max:
+                    if depth == 0:
                         self.best_move = move
 
                 # then revert the move
@@ -67,9 +67,9 @@ class Engine(object):
                 # go deeper in the search tree recursively
                 value = self.minmax(False, depth + 1, alpha, beta)
 
-                if value > alpha:
+                if value >= alpha:
                     alpha = value
-                    if depth == 0 and is_max:
+                    if depth == 0:
                         self.best_move = move
 
                 # then revert the move
@@ -83,10 +83,12 @@ class Engine(object):
 
     def best_tiger_move(self):
         self.minmax()
+        assert self.best_move is not None, "best_tiger_move is None."
         return self.best_move
 
     def best_goat_move(self):
         self.minmax(is_max=False)
+        assert self.best_move is not None, "best_goat_move is None."
         return self.best_move
 
     def make_best_move(self):
@@ -102,4 +104,3 @@ class Engine(object):
         else:
             move = self.best_tiger_move()
         return move
-
