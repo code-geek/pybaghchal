@@ -36,6 +36,7 @@ class UIGame(object):
 
         self.game = None
         self.win = ''
+        self.ai_turn = False
 
         self.config = configparser.SafeConfigParser(defaults={
             'sheepcolor': 'gray',
@@ -174,15 +175,22 @@ class UIGame(object):
             self.statustext.set('Turn: %s | R: %d | D: %d' %
                                 (self.board.turn, self.board.goatsToBePlaced, self.board.deadGoats))
 
-            if self.board.turn == Board.Player.G:
-                if self.board.goatsToBePlaced > 0:
-                    self.canvas.bind('<Button-1>', self.place_goat)
-                else:
-                    self.canvas.bind('<ButtonPress-1>', self.move_goat)
-                    self.canvas.bind('<ButtonRelease-1>', self.move_goat2)
-            elif self.board.turn == Board.Player.T:
-                self.canvas.bind('<ButtonPress-1>', self.move_tiger)
-                self.canvas.bind('<ButtonRelease-1>', self.move_tiger2)
+            if not self.ai_turn:
+                self.ai_turn = True
+                if self.board.turn == Board.Player.G:
+                    if self.board.goatsToBePlaced > 0:
+                        self.canvas.bind('<Button-1>', self.place_goat)
+                    else:
+                        self.canvas.bind('<ButtonPress-1>', self.move_goat)
+                        self.canvas.bind('<ButtonRelease-1>', self.move_goat2)
+                elif self.board.turn == Board.Player.T:
+                    self.canvas.bind('<ButtonPress-1>', self.move_tiger)
+                    self.canvas.bind('<ButtonRelease-1>', self.move_tiger2)
+            else:
+                self.ai_turn = False
+                self.statustext.set('Thinking')
+                # self.canvas.bind('<Button-1>', self.make_ai_move)
+                self.make_ai_move()
 
         tr = self.tiger_radius
         sr = self.sheep_radius
@@ -235,10 +243,19 @@ class UIGame(object):
         #     cmdline.append('3')
 
         # self.win = ''
-        self.board = Board()
+        self.init_ai()
         # self.engine.make_best_move()
         # self.check_win()
         self.draw()
+
+    def init_ai(self):
+        self.ai_vs_ai = True
+        self.board = Board()
+        self.engine = Engine(self.board, depth=3)
+
+    def make_ai_move(self, ev=None):
+        move = self.engine.get_best_move()
+        self.apply_move(move)
 
 
 def configure():
