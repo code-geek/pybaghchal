@@ -162,6 +162,7 @@ class UIGame(object):
         else:
             self.board.make_move(move)
             self.check_win()
+            self.ai_turn = not self.ai_turn
         self.draw()
 
     def draw(self):
@@ -176,7 +177,6 @@ class UIGame(object):
                                 (self.board.turn, self.board.goatsToBePlaced, self.board.deadGoats))
 
             if not self.ai_turn:
-                self.ai_turn = True
                 if self.board.turn == Board.Player.G:
                     if self.board.goatsToBePlaced > 0:
                         self.canvas.bind('<Button-1>', self.place_goat)
@@ -187,7 +187,6 @@ class UIGame(object):
                     self.canvas.bind('<ButtonPress-1>', self.move_tiger)
                     self.canvas.bind('<ButtonRelease-1>', self.move_tiger2)
             else:
-                self.ai_turn = False
                 self.statustext.set('Thinking')
                 # self.canvas.bind('<Button-1>', self.make_ai_move)
                 self.make_ai_move()
@@ -249,9 +248,9 @@ class UIGame(object):
         self.draw()
 
     def init_ai(self):
-        self.ai_vs_ai = True
+        self.ai_vs_ai = False
         self.board = Board()
-        self.engine = Engine(self.board, depth=3)
+        self.engine = Engine(self.board, depth=5)
 
     def make_ai_move(self, ev=None):
         move = self.engine.get_best_move()
