@@ -96,3 +96,10 @@ class Engine(object):
             move = self.best_tiger_move()
         self.board.make_move(move)
 
+    def get_best_move(self):
+        if self.board.turn == Board.Player.G:
+            move = self.best_goat_move()
+        else:
+            move = self.best_tiger_move()
+        return move
+
