@@ -54,7 +54,7 @@ class Engine(object):
 
                 # ab pruning
                 if alpha >= beta:
-                    return beta
+                    break
 
             return beta
 
@@ -77,7 +77,7 @@ class Engine(object):
 
                 # ab pruning
                 if alpha >= beta:
-                    return alpha
+                    break
 
             return alpha
 
