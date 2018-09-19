@@ -17,7 +17,6 @@ class UIGame(object):
     _idx_to_col = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}
 
     def __init__(self, canvas, statustext):
-        super(UIGame, self).__init__()
         # self.board = Board('1GG1G/1GGGT/1GGGG/GGTGG/GTGTG t g0 c3 mA3')
         self.board = Board()
 
@@ -36,7 +35,7 @@ class UIGame(object):
 
         self.game = None
         self.win = ''
-        self.ai_turn = False
+        self.ai_turn = True
 
         self.config = configparser.SafeConfigParser(defaults={
             'sheepcolor': 'gray',
@@ -215,6 +214,7 @@ class UIGame(object):
             # self.game = None
             self.statustext.set('Tigers win!')
             self.win = 'tigers'
+            print(self.win)
             return
 
         elif self.board.winner == Board.Player.T:
@@ -222,35 +222,37 @@ class UIGame(object):
             # self.game = None
             self.statustext.set('Goats win!')
             self.win = 'goats'
+            print(self.win)
             return
 
     def new(self):
-        # self.config = configparser.SafeConfigParser()
-        # self.config.read(os.path.expanduser('uiconf'))
+        self.config = configparser.ConfigParser()
+        self.config.read(os.path.expanduser('uiconf'))
 
-        # if self.config.has_option('game', 'ai'):
-        #     if self.config.get('game', 'ai').lower() == 'sheep':
-        #         cmdline.append('-s')
-        #     elif self.config.get('game', 'ai').lower() == 'tiger':
-        #         cmdline.append('-t')
-        # else:
-        #     cmdline.append('-s')
+        if self.config.has_option('game', 'ai'):
+            if self.config.get('game', 'ai').lower() == 'sheep':
+                self.ai_turn = True
+            elif self.config.get('game', 'ai').lower() == 'tiger':
+                self.ai_turn = False
+                print('tiger')
+        else:
+            pass
 
-        # if self.config.has_option('game', 'aistrength'):
-        #     cmdline.append(self.config.get('game', 'aistrength'))
-        # else:
-        #     cmdline.append('3')
+        if self.config.has_option('game', 'aistrength'):
+            aistrength = self.config.get('game', 'aistrength')
+        else:
+            aistrength = 6
 
         # self.win = ''
-        self.init_ai()
+        self.init_ai(int(aistrength))
         # self.engine.make_best_move()
         # self.check_win()
         self.draw()
 
-    def init_ai(self):
+    def init_ai(self, aistrength):
         self.ai_vs_ai = False
         self.board = Board()
-        self.engine = Engine(self.board, depth=5)
+        self.engine = Engine(self.board, depth=aistrength)
 
     def make_ai_move(self, ev=None):
         move = self.engine.get_best_move()
@@ -258,7 +260,8 @@ class UIGame(object):
 
 
 def configure():
-    config = configparser.SafeConfigParser()
+    config = configparser.ConfigParser()
+    print('haha')
     config.add_section('game')
     config.read(os.path.expanduser('uiconf'))
 

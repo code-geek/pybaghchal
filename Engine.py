@@ -21,7 +21,7 @@ class Engine(object):
         """
         winner = self.board.winner
         if not winner:
-            return 3 * self.board.movable_tigers() + 7 * self.board.deadGoats - depth
+            return 30 * self.board.movable_tigers() + 70 * self.board.deadGoats - depth
 
         if winner == Board.Player.G:
             return -Engine.INF
@@ -37,6 +37,7 @@ class Engine(object):
 
         # find the minimum attainable value for the minimizer
         if not is_max:
+            value = self.INF
             for move in self.board.generate_move_list():
                 # first make the move
                 self.board.make_move(move)
@@ -56,10 +57,11 @@ class Engine(object):
                 if alpha >= beta:
                     break
 
-            return beta
+            return value
 
         # find the maximum attainable value for the maximizer
         else:
+            value = -self.INF
             for move in self.board.generate_move_list():
                 # first make the move
                 self.board.make_move(move)
@@ -79,7 +81,7 @@ class Engine(object):
                 if alpha >= beta:
                     break
 
-            return alpha
+            return value
 
     def best_tiger_move(self):
         self.minmax()
