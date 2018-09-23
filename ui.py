@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import configparser
 import itertools
@@ -27,7 +29,7 @@ class UIGame(object):
         self.from_idx = None
 
         self.tiger_radius = 7
-        self.sheep_radius = 5
+        self.goat_radius = 5
 
         self.board_grid_x = [10, 60, 110, 160, 210]
         self.board_grid_y = [10, 60, 110, 160, 210]
@@ -37,12 +39,12 @@ class UIGame(object):
         self.win = ''
         self.ai_turn = True
 
-        self.config = configparser.SafeConfigParser(defaults={
-            'sheepcolor': 'gray',
+        self.config = configparser.ConfigParser(defaults={
+            'goatcolor': 'gray',
             'tigercolor': 'yellow'
         })
         self.config.add_section('ui')
-        self.sheep_color = self.config.get('ui', 'sheepcolor')
+        self.goat_color = self.config.get('ui', 'goatcolor')
         self.tiger_color = self.config.get('ui', 'tigercolor')
 
         self.draw_board()
@@ -191,7 +193,7 @@ class UIGame(object):
                 self.make_ai_move()
 
         tr = self.tiger_radius
-        sr = self.sheep_radius
+        sr = self.goat_radius
 
         # display the tigers and goats on the ui board
         for entry, (y, x) in zip(Board._get_full_position(self.board.position.split()[0]),
@@ -205,7 +207,7 @@ class UIGame(object):
             elif entry == "G":
                 self.cids.append(self.canvas.create_oval(x - sr, y - sr,
                                                          x + sr, y + sr,
-                                                         fill=self.sheep_color))
+                                                         fill=self.goat_color))
 
     def check_win(self):
         # read the current board position
@@ -214,15 +216,13 @@ class UIGame(object):
             # self.game = None
             self.statustext.set('Tigers win!')
             self.win = 'tigers'
-            print(self.win)
             return
 
-        elif self.board.winner == Board.Player.T:
+        elif self.board.winner == Board.Player.G:
             # self.game.wait()
             # self.game = None
             self.statustext.set('Goats win!')
             self.win = 'goats'
-            print(self.win)
             return
 
     def new(self):
@@ -230,11 +230,10 @@ class UIGame(object):
         self.config.read(os.path.expanduser('uiconf'))
 
         if self.config.has_option('game', 'ai'):
-            if self.config.get('game', 'ai').lower() == 'sheep':
+            if self.config.get('game', 'ai').lower() == 'goat':
                 self.ai_turn = True
             elif self.config.get('game', 'ai').lower() == 'tiger':
                 self.ai_turn = False
-                print('tiger')
         else:
             pass
 
@@ -261,7 +260,6 @@ class UIGame(object):
 
 def configure():
     config = configparser.ConfigParser()
-    print('haha')
     config.add_section('game')
     config.read(os.path.expanduser('uiconf'))
 

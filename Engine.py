@@ -43,17 +43,20 @@ class Engine(object):
                 self.board.make_move(move)
 
                 # go deeper in the search tree recursively
-                value = self.minmax(True, depth + 1, alpha, beta)
+                value_t = self.minmax(True, depth + 1, alpha, beta)
 
-                if value <= beta:
-                    beta = value
+                beta = min(beta, value_t)
+
+
+                if value_t <= value:
+                    value = value_t
+                    beta = min(beta, value)
                     if depth == 0:
                         self.best_move = move
 
                 # then revert the move
                 self.board.revert_move(move)
 
-                # ab pruning
                 if alpha >= beta:
                     break
 
@@ -67,18 +70,20 @@ class Engine(object):
                 self.board.make_move(move)
 
                 # go deeper in the search tree recursively
-                value = self.minmax(False, depth + 1, alpha, beta)
+                value_t = self.minmax(False, depth + 1, alpha, beta)
 
-                if value >= alpha:
-                    alpha = value
+                if value_t >= value:
+                    value = value_t
+                    alpha = max(alpha, value)
                     if depth == 0:
                         self.best_move = move
+
+
 
                 # then revert the move
                 self.board.revert_move(move)
 
-                # ab pruning
-                if alpha >= beta:
+                if alpha > beta:
                     break
 
             return value

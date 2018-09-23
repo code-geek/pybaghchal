@@ -395,7 +395,6 @@ class Board(object):
         """
         Returns the number of movable tigers on the board
         """
-
         return sum(int(self._movable(t)) for t in self.tigerPos)
 
     def generate_move_list(self, rdm=True):
