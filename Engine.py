@@ -21,7 +21,7 @@ class Engine(object):
         """
         winner = self.board.winner
         if not winner:
-            return 3 * self.board.movable_tigers() + 7 * self.board.deadGoats - depth
+            return 30 * self.board.movable_tigers() + 70 * self.board.deadGoats - depth
 
         if winner == Board.Player.G:
             return -Engine.INF
@@ -37,49 +37,56 @@ class Engine(object):
 
         # find the minimum attainable value for the minimizer
         if not is_max:
+            value = self.INF
             for move in self.board.generate_move_list():
                 # first make the move
                 self.board.make_move(move)
 
                 # go deeper in the search tree recursively
-                value = self.minmax(True, depth + 1, alpha, beta)
+                value_t = self.minmax(True, depth + 1, alpha, beta)
 
-                if value <= beta:
-                    beta = value
+                beta = min(beta, value_t)
+
+
+                if value_t <= value:
+                    value = value_t
+                    beta = min(beta, value)
                     if depth == 0:
                         self.best_move = move
 
                 # then revert the move
                 self.board.revert_move(move)
 
-                # ab pruning
                 if alpha >= beta:
-                    return beta
+                    break
 
-            return beta
+            return value
 
         # find the maximum attainable value for the maximizer
         else:
+            value = -self.INF
             for move in self.board.generate_move_list():
                 # first make the move
                 self.board.make_move(move)
 
                 # go deeper in the search tree recursively
-                value = self.minmax(False, depth + 1, alpha, beta)
+                value_t = self.minmax(False, depth + 1, alpha, beta)
 
-                if value >= alpha:
-                    alpha = value
+                if value_t >= value:
+                    value = value_t
+                    alpha = max(alpha, value)
                     if depth == 0:
                         self.best_move = move
+
+
 
                 # then revert the move
                 self.board.revert_move(move)
 
-                # ab pruning
-                if alpha >= beta:
-                    return alpha
+                if alpha > beta:
+                    break
 
-            return alpha
+            return value
 
     def best_tiger_move(self):
         self.minmax()

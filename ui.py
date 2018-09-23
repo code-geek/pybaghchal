@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import configparser
 import itertools
@@ -17,7 +19,6 @@ class UIGame(object):
     _idx_to_col = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E'}
 
     def __init__(self, canvas, statustext):
-        super(UIGame, self).__init__()
         # self.board = Board('1GG1G/1GGGT/1GGGG/GGTGG/GTGTG t g0 c3 mA3')
         self.board = Board()
 
@@ -28,7 +29,7 @@ class UIGame(object):
         self.from_idx = None
 
         self.tiger_radius = 7
-        self.sheep_radius = 5
+        self.goat_radius = 5
 
         self.board_grid_x = [10, 60, 110, 160, 210]
         self.board_grid_y = [10, 60, 110, 160, 210]
@@ -36,14 +37,14 @@ class UIGame(object):
 
         self.game = None
         self.win = ''
-        self.ai_turn = False
+        self.ai_turn = True
 
-        self.config = configparser.SafeConfigParser(defaults={
-            'sheepcolor': 'gray',
+        self.config = configparser.ConfigParser(defaults={
+            'goatcolor': 'gray',
             'tigercolor': 'yellow'
         })
         self.config.add_section('ui')
-        self.sheep_color = self.config.get('ui', 'sheepcolor')
+        self.goat_color = self.config.get('ui', 'goatcolor')
         self.tiger_color = self.config.get('ui', 'tigercolor')
 
         self.draw_board()
@@ -192,7 +193,7 @@ class UIGame(object):
                 self.make_ai_move()
 
         tr = self.tiger_radius
-        sr = self.sheep_radius
+        sr = self.goat_radius
 
         # display the tigers and goats on the ui board
         for entry, (y, x) in zip(Board._get_full_position(self.board.position.split()[0]),
@@ -206,7 +207,7 @@ class UIGame(object):
             elif entry == "G":
                 self.cids.append(self.canvas.create_oval(x - sr, y - sr,
                                                          x + sr, y + sr,
-                                                         fill=self.sheep_color))
+                                                         fill=self.goat_color))
 
     def check_win(self):
         # read the current board position
@@ -217,7 +218,7 @@ class UIGame(object):
             self.win = 'tigers'
             return
 
-        elif self.board.winner == Board.Player.T:
+        elif self.board.winner == Board.Player.G:
             # self.game.wait()
             # self.game = None
             self.statustext.set('Goats win!')
@@ -225,32 +226,32 @@ class UIGame(object):
             return
 
     def new(self):
-        # self.config = configparser.SafeConfigParser()
-        # self.config.read(os.path.expanduser('uiconf'))
+        self.config = configparser.ConfigParser()
+        self.config.read(os.path.expanduser('uiconf'))
 
-        # if self.config.has_option('game', 'ai'):
-        #     if self.config.get('game', 'ai').lower() == 'sheep':
-        #         cmdline.append('-s')
-        #     elif self.config.get('game', 'ai').lower() == 'tiger':
-        #         cmdline.append('-t')
-        # else:
-        #     cmdline.append('-s')
+        if self.config.has_option('game', 'ai'):
+            if self.config.get('game', 'ai').lower() == 'goat':
+                self.ai_turn = True
+            elif self.config.get('game', 'ai').lower() == 'tiger':
+                self.ai_turn = False
+        else:
+            pass
 
-        # if self.config.has_option('game', 'aistrength'):
-        #     cmdline.append(self.config.get('game', 'aistrength'))
-        # else:
-        #     cmdline.append('3')
+        if self.config.has_option('game', 'aistrength'):
+            aistrength = self.config.get('game', 'aistrength')
+        else:
+            aistrength = 6
 
         # self.win = ''
-        self.init_ai()
+        self.init_ai(int(aistrength))
         # self.engine.make_best_move()
         # self.check_win()
         self.draw()
 
-    def init_ai(self):
+    def init_ai(self, aistrength):
         self.ai_vs_ai = False
         self.board = Board()
-        self.engine = Engine(self.board, depth=5)
+        self.engine = Engine(self.board, depth=aistrength)
 
     def make_ai_move(self, ev=None):
         move = self.engine.get_best_move()
@@ -258,7 +259,7 @@ class UIGame(object):
 
 
 def configure():
-    config = configparser.SafeConfigParser()
+    config = configparser.ConfigParser()
     config.add_section('game')
     config.read(os.path.expanduser('uiconf'))
 
