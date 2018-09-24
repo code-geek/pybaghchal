@@ -425,6 +425,24 @@ class Board(object):
 
         return move_list
 
+    def _get_empty_positions(self):
+        return [i.get_index(i.coord) for i in self.points if i.state.name == 'E']
+
+    def _is_closed(self, position):
+
+        for i in self._move_connections[position]:
+            if self.points[i].state.name in {'T', 'E'}:
+                return False
+        return True
+
+    @property
+    def no_of_closed_spaces(self):
+        closed_spaces = 0
+        for i in self._get_empty_positions():
+            if self._is_closed(i):
+                closed_spaces += 1
+        return closed_spaces
+
     def copy(self):
         board = Board()
         board.points = self.points

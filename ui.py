@@ -28,12 +28,12 @@ class UIGame(object):
         self.cids = []
         self.from_idx = None
 
-        self.tiger_radius = 7
-        self.goat_radius = 5
+        self.tiger_radius = 20
+        self.goat_radius = 20
 
-        self.board_grid_x = [10, 60, 110, 160, 210]
-        self.board_grid_y = [10, 60, 110, 160, 210]
-        self.board_rect = [1, 1, 221, 221]
+        self.board_grid_x = [30, 130, 230, 330, 430]
+        self.board_grid_y = [30, 130, 230, 330, 430]
+        self.board_rect = [2, 2, 462, 462]
 
         self.game = None
         self.win = ''
@@ -326,10 +326,12 @@ def rules():
 tk = tkinter.Tk()
 tk.title('BaghChal')
 
+tk.resizable(0, 0)
+
 frame = tkinter.Frame(tk)
 frame.pack(fill=BOTH, expand=1)
 
-canvas = tkinter.Canvas(frame, width=220, height=220)
+canvas = tkinter.Canvas(frame, width=460, height=460)
 canvas.pack(fill=BOTH, expand=1, side=TOP, padx=1, pady=1)
 
 statustext = tkinter.StringVar()
