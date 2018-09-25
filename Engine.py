@@ -21,7 +21,8 @@ class Engine(object):
         """
         winner = self.board.winner
         if not winner:
-            return 30 * self.board.movable_tigers() + 70 * self.board.deadGoats - depth
+            return 300 * self.board.movable_tigers() + 700 * self.board.deadGoats\
+                   - 100 * self.board.no_of_closed_spaces - depth
 
         if winner == Board.Player.G:
             return -Engine.INF
@@ -37,7 +38,7 @@ class Engine(object):
 
         # find the minimum attainable value for the minimizer
         if not is_max:
-            value = self.INF
+            value = 100000000
             for move in self.board.generate_move_list():
                 # first make the move
                 self.board.make_move(move)
@@ -48,7 +49,7 @@ class Engine(object):
                 beta = min(beta, value_t)
 
 
-                if value_t <= value:
+                if value_t < value:
                     value = value_t
                     beta = min(beta, value)
                     if depth == 0:
@@ -64,7 +65,7 @@ class Engine(object):
 
         # find the maximum attainable value for the maximizer
         else:
-            value = -self.INF
+            value = -100000000
             for move in self.board.generate_move_list():
                 # first make the move
                 self.board.make_move(move)
@@ -72,7 +73,7 @@ class Engine(object):
                 # go deeper in the search tree recursively
                 value_t = self.minmax(False, depth + 1, alpha, beta)
 
-                if value_t >= value:
+                if value_t > value:
                     value = value_t
                     alpha = max(alpha, value)
                     if depth == 0:
@@ -83,7 +84,7 @@ class Engine(object):
                 # then revert the move
                 self.board.revert_move(move)
 
-                if alpha > beta:
+                if alpha >= beta:
                     break
 
             return value
