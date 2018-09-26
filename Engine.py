@@ -22,7 +22,7 @@ class Engine(object):
         winner = self.board.winner
         if not winner:
             return 300 * self.board.movable_tigers() + 700 * self.board.deadGoats\
-                   - 100 * self.board.no_of_closed_spaces - depth
+                   - 700 * self.board.no_of_closed_spaces - depth
 
         if winner == Board.Player.G:
             return -Engine.INF

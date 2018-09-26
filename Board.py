@@ -426,22 +426,32 @@ class Board(object):
         return move_list
 
     def _get_empty_positions(self):
+        """
+        Returns all the empty positions(points) in the board.
+        """
         return [i.get_index(i.coord) for i in self.points if i.state.name == 'E']
 
     def _is_closed(self, position):
+        """
+        Returns True if the position is closed else False.
+        --------------------------------------------------
+        Closed means that the position is empty and surrounded
+        by all the neighbouring goats.  In addition, no tigers
+        can access the empty position by capturing.
+        """
 
-        for i in self._move_connections[position]:
-            if self.points[i].state.name in {'T', 'E'}:
-                return False
-        return True
+        all_goat_neighbours = any([not self.points[i].state.name in {'T', 'E'} for i in self._move_connections[position]])
+
+        capture_tiger_present = any([self.points[i].state.name == 'T' for i in self._capture_connections[position]])
+
+        return all_goat_neighbours and not capture_tiger_present
 
     @property
     def no_of_closed_spaces(self):
-        closed_spaces = 0
-        for i in self._get_empty_positions():
-            if self._is_closed(i):
-                closed_spaces += 1
-        return closed_spaces
+        """
+        Return the number of closed spaces in the board.
+        """
+        return len([True for i in self._get_empty_positions() if self._is_closed(i)])
 
     def copy(self):
         board = Board()
