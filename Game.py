@@ -11,7 +11,7 @@ class Game(object):
     def __init__(self, position=None):
         super(Game, self).__init__()
         self.board = Board(position)
-        self.engine = Engine(self.board, depth=7)
+        self.engine = Engine(self.board, depth=5)
 
     def input_move(self):
         idx = None
