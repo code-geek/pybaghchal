@@ -1,5 +1,5 @@
 # Bagh-Chal
-Bag-Chal is the 2-player strategic board game consisting of tigers and goats originated in Nepal.  Played on 5 by 5 grid, the game has 20 goats and 4 tigers in the starting of the game.  Tigers aim to capture the goat and goat aim to restrict legal movement of tiger.  When none of the tigers are given legal movement, goats win whereas death of 5 goats make the tiger winner.
+Bagh-Chal is the 2-player strategic board game consisting of tigers and goats originated in Nepal.  Played on 5 by 5 grid, the game has 20 goats and 4 tigers in the starting of the game.  Tigers aim to capture the goat and goat aim to restrict legal movement of tiger.  When none of the tigers are given legal movement, goats win whereas death of 5 goats make the tiger winner.
 Regarding rules and more information of Bag-Chal, please [click here](https://en.wikipedia.org/wiki/Bagh-Chal).
 
 ## About This Repository:
